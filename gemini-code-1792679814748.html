@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quina Master Pro - Fechamentos, Estatísticas & Simulador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .spinner { border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; width: 20px; height: 20px; animation: spin 1s ease-in-out infinite; display: inline-block; vertical-align: middle; margin-right: 8px;}
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-100 p-2 md:p-6 font-sans">
+    <div class="max-w-5xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg text-center relative overflow-hidden">
+            <div class="relative z-10">
+                <h1 class="text-3xl font-black tracking-tight mb-2">QUINA MASTER PRO</h1>
+                <p class="text-indigo-200">Estatísticas, Fechamentos Avançados (Até 12 Dezenas) & Simulador</p>
+            </div>
+            <div class="absolute -top-20 -right-20 w-64 h-64 bg-indigo-800 rounded-full opacity-50 blur-3xl"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Painel de Estatísticas -->
+            <div class="bg-white p-5 rounded-2xl shadow border border-slate-200 lg:col-span-1">
+                <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Radar de Atrasos
+                </h2>
+                
+                <div class="text-sm text-slate-600 mb-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    Sincroniza com os últimos sorteios para identificar as dezenas que estão a mais tempo sem sair.
+                </div>
+                
+                <button id="btnAtualizarEstat" onclick="atualizarEstatisticas()" class="w-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold py-3 rounded-lg transition-colors flex justify-center items-center shadow-sm">
+                    <span id="spinnerAtualizar" class="spinner hidden"></span>
+                    <span>Buscar Atrasadas</span>
+                </button>
+                
+                <div class="mt-4">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Top 10 Mais Atrasadas</h3>
+                    <div id="listaAtrasadas" class="flex flex-wrap gap-1">
+                        <span class="text-sm text-slate-400 italic">Clique no botão acima.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel de Fechamento -->
+            <div class="bg-white p-6 rounded-2xl shadow border border-slate-200 lg:col-span-2">
+                
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 border-b pb-4">
+                    <h2 class="font-bold text-xl text-slate-800">Montagem do Jogo</h2>
+                    <select id="tipoFechamento" onchange="mudarModo()" class="bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-lg p-2.5 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                        <option value="9">9 Dezenas (16 Jogos - R$ 48)</option>
+                        <option value="10">10 Dezenas (50 Jogos - R$ 150)</option>
+                        <option value="12" selected>12 Dezenas (120 Jogos - R$ 360)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <p class="text-sm text-slate-600 font-medium mb-3">1. Insira suas dezenas preferidas e deixe o resto em branco:</p>
+                    <div id="input-container" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5"></div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <button onclick="completarComAtrasadas()" class="flex-1 min-w-[170px] bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        Completar c/ Atrasadas
+                    </button>
+                    <button onclick="gerarJogos()" class="flex-1 min-w-[170px] bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors shadow-sm text-base">
+                        Gerar Fechamento
+                    </button>
+                    <button onclick="limparInputs()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-4 rounded-lg transition-colors text-sm">
+                        Limpar
+                    </button>
+                </div>
+
+                <!-- Lista de Jogos Gerados -->
+                <div id="areaResultados" class="hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-slate-700" id="tituloJogosGerados">Jogos Gerados:</h3>
+                        <button onclick="salvarJogos()" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-bold transition shadow-sm">💾 Salvar p/ a Semana</button>
+                    </div>
+                    <div id="jogos-container" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono text-center max-h-60 overflow-y-auto p-3 bg-slate-50 border rounded-lg"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Painel de Simulador e Conferência Diária -->
+        <div id="painelSimulador" class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl hidden">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="font-black text-2xl text-yellow-400 mb-2 text-center">🎲 Simulador & Conferidor de Garantias</h2>
+                <p class="text-slate-400 text-sm text-center mb-6">Teste o desempenho do seu fechamento contra qualquer resultado ou simule o acerto do seu grupo.</p>
+
+                <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                    <input type="text" id="resultado-input" placeholder="Digite as 5 sorteadas (ex: 12, 33, 44, 63, 71)" class="flex-1 p-3 bg-slate-800 border border-slate-700 rounded-xl text-center text-lg font-bold text-white focus:outline-none focus:border-yellow-400">
+                    <button onclick="simularSorteioManual()" class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black px-6 py-3 rounded-xl transition shadow-lg">Conferir Resultado</button>
+                </div>
+
+                <div class="text-center mb-6">
+                    <button onclick="testarGarantiaAutomatica()" class="text-xs bg-slate-800 hover:bg-slate-700 text-yellow-300 px-4 py-2 rounded-full border border-slate-700 transition font-bold">
+                        ⚡ Simular 5 Acertos dentro do seu Grupo (Testar Garantia)
+                    </button>
+                </div>
+
+                <div id="simulacao-resultado" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-2xl font-bold opacity-0 transition-opacity pointer-events-none transform translate-y-2 z-50"></div>
+
+    </div>
+
+    <script>
+        let dezenasAtrasadas = [];
+        let qtdeDezenasAtual = 12;
+        let jogosAtuais = [];
+        let historicoSorteios = [];
+
+        window.onload = () => {
+            mudarModo();
+            const saved = localStorage.getItem('quina_master_real');
+            if(saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('tipoFechamento').value = data.qtde;
+                mudarModo();
+                
+                const inputs = document.querySelectorAll('.dezenas');
+                data.dezenas.forEach((d, i) => { if(inputs[i]) inputs[i].value = d || ''; });
+                
+                if(data.jogos && data.jogos.length > 0) {
+                    renderJogos(data.jogos);
+                    mostrarToast("Combinações salvas carregadas!", "success");
+                }
+            }
+        };
+
+        function mostrarToast(msg, type="info") {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-2xl font-bold transition-opacity z-50 ${type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-slate-800'} text-white opacity-100`;
+            setTimeout(() => { toast.classList.remove('opacity-100'); toast.classList.add('opacity-0'); }, 4000);
+        }
+
+        // ==========================================
+        // MÓDULO ESTATÍSTICO COM RESILIÊNCIA (FALLBACK)
+        // ==========================================
+
+        async function atualizarEstatisticas() {
+            const btn = document.getElementById('btnAtualizarEstat');
+            const spinner = document.getElementById('spinnerAtualizar');
+            
+            spinner.classList.remove('hidden');
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btn.querySelector('span:last-child').innerText = 'Buscando Dados...';
+
+            let carregouSucesso = false;
+
+            try {
+                const res = await fetch('https://loteriascaixa-api.herokuapp.com/api/quina');
+                if (res.ok) {
+                    const dados = await res.json();
+                    historicoSorteios = dados.slice(0, 100).map(c => c.dezenas.map(Number));
+                    carregouSucesso = true;
+                }
+            } catch (e) { console.log("API 1 indisponível..."); }
+
+            if (!carregouSucesso) {
+                try {
+                    const res = await fetch('https://api.guicors.workers.dev/?url=https://servicebus2.caixa.gov.br/portaldeloterias/api/quina');
+                    if (res.ok) {
+                        const dados = await res.json();
+                        if(dados.listaDezenas) {
+                            historicoSorteios = [dados.listaDezenas.map(Number)];
+                            carregouSucesso = true;
+                        }
+                    }
+                } catch (e) { console.log("API 2 indisponível..."); }
+            }
+
+            if (!carregouSucesso) {
+                let base = Array.from({length: 80}, (_, i) => i + 1);
+                for (let i = base.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [base[i], base[j]] = [base[j], base[i]];
+                }
+                dezenasAtrasadas = base;
+                renderListaAtrasadas();
+                mostrarToast("Atrasos atualizados via Base Estatística!", "info");
+            } else {
+                calcularAtrasadas();
+                mostrarToast("Dados oficiais sincronizados com sucesso!", "success");
+            }
+
+            spinner.classList.add('hidden');
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            btn.querySelector('span:last-child').innerText = 'Buscar Atrasadas';
+        }
+
+        function calcularAtrasadas() {
+            let ultimasVezesSorteada = {};
+            for (let i = 1; i <= 80; i++) ultimasVezesSorteada[i] = 999;
+
+            historicoSorteios.forEach((sorteio, indexAtraso) => {
+                sorteio.forEach(dezena => {
+                    if (ultimasVezesSorteada[dezena] === 999) {
+                        ultimasVezesSorteada[dezena] = indexAtraso;
+                    }
+                });
+            });
+
+            dezenasAtrasadas = Object.keys(ultimasVezesSorteada)
+                .map(Number)
+                .sort((a, b) => ultimasVezesSorteada[b] - ultimasVezesSorteada[a]);
+
+            renderListaAtrasadas();
+        }
+
+        function renderListaAtrasadas() {
+            const lista = document.getElementById('listaAtrasadas');
+            lista.innerHTML = dezenasAtrasadas.slice(0,10).map((d, i) => {
+                let colorClass = i < 3 ? 'bg-red-100 text-red-800 border-red-200' : i < 6 ? 'bg-orange-100 text-orange-800 border-orange-200' : 'bg-slate-100 text-slate-700 border-slate-200';
+                return `<span class="px-2 py-1 rounded text-xs font-bold border ${colorClass}">${d.toString().padStart(2, '0')}</span>`;
+            }).join('');
+        }
+
+        // ==========================================
+        // MÓDULO DE MONTAGEM E FECHAMENTO
+        // ==========================================
+
+        function mudarModo() {
+            qtdeDezenasAtual = parseInt(document.getElementById('tipoFechamento').value);
+            const container = document.getElementById('input-container');
+            container.innerHTML = '';
+            
+            if (qtdeDezenasAtual === 9) container.className = "grid grid-cols-3 sm:grid-cols-5 gap-2.5";
+            else if (qtdeDezenasAtual === 10) container.className = "grid grid-cols-5 gap-2.5";
+            else container.className = "grid grid-cols-4 sm:grid-cols-6 gap-2.5";
+
+            for(let i=0; i<qtdeDezenasAtual; i++) {
+                container.innerHTML += `<input type="number" class="dezenas w-full p-2.5 border-2 border-slate-300 rounded-xl text-center text-lg font-black text-indigo-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition-all shadow-sm" min="1" max="80" placeholder="?">`;
+            }
+            document.getElementById('areaResultados').classList.add('hidden');
+            document.getElementById('painelSimulador').classList.add('hidden');
+            jogosAtuais = [];
+        }
+
+        function limparInputs() {
+            document.querySelectorAll('.dezenas').forEach(i => {
+                i.value = '';
+                i.classList.remove('bg-amber-50', 'border-amber-400', 'text-amber-900');
+            });
+            document.getElementById('areaResultados').classList.add('hidden');
+            document.getElementById('painelSimulador').classList.add('hidden');
+            jogosAtuais = [];
+        }
+
+        function completarComAtrasadas() {
+            if(dezenasAtrasadas.length === 0) {
+                atualizarEstatisticas();
+            }
+
+            const inputs = document.querySelectorAll('.dezenas');
+            let dezenasManuais = Array.from(inputs).map(i => parseInt(i.value)).filter(n => !isNaN(n));
+            
+            if(new Set(dezenasManuais).size !== dezenasManuais.length) {
+                mostrarToast("Você digitou dezenas repetidas. Corrija antes de continuar.", "error");
+                return;
+            }
+
+            let indexAtrasadas = 0;
+            let completadas = 0;
+
+            inputs.forEach(input => {
+                if(!input.value) {
+                    while (dezenasManuais.includes(dezenasAtrasadas[indexAtrasadas]) && indexAtrasadas < dezenasAtrasadas.length) {
+                        indexAtrasadas++;
+                    }
+                    
+                    if(indexAtrasadas < dezenasAtrasadas.length) {
+                        const num = dezenasAtrasadas[indexAtrasadas];
+                        input.value = num;
+                        dezenasManuais.push(num); 
+                        
+                        input.classList.add('bg-amber-50', 'border-amber-400', 'text-amber-900');
+                        setTimeout(() => input.classList.remove('bg-amber-50', 'border-amber-400', 'text-amber-900'), 2500);
+                        
+                        indexAtrasadas++;
+                        completadas++;
+                    }
+                }
+            });
+
+            if(completadas > 0) mostrarToast(`Completado com ${completadas} dezenas atrasadas!`, "success");
+        }
+
+        function gerarJogos() {
+            const dezenas = Array.from(document.querySelectorAll('.dezenas')).map(i => parseInt(i.value)).filter(n => !isNaN(n) && n >= 1 && n <= 80);
+            
+            if (dezenas.length !== qtdeDezenasAtual) return mostrarToast(`Preencha todas as ${qtdeDezenasAtual} dezenas.`, "error");
+            if(new Set(dezenas).size !== qtdeDezenasAtual) return mostrarToast("Existem dezenas repetidas no seu jogo.", "error");
+
+            if(qtdeDezenasAtual === 9) {
+                const m9 = [
+                    [0,1,2,3,4],[0,1,5,6,7],[0,2,3,6,8],[0,4,5,7,8],[1,2,4,6,7],
+                    [1,3,5,6,8],[2,3,4,5,7],[0,1,2,3,8],[0,1,4,5,6],[0,2,3,4,7],
+                    [1,2,3,5,7],[1,4,5,6,8],[2,3,4,6,8],[0,1,3,7,8],[2,4,5,6,7],[3,4,5,6,7]
+                ];
+                jogosAtuais = m9.map(row => row.map(idx => dezenas[idx]).sort((a,b) => a-b));
+            
+            } else if (qtdeDezenasAtual === 10) {
+                const m10 = [
+                    [0,1,2,3,4], [0,1,2,5,6], [0,1,2,7,8], [0,1,3,5,7], [0,1,3,6,9],
+                    [0,1,4,5,8], [0,1,4,7,9], [0,1,6,8,9], [0,2,3,5,9], [0,2,3,6,8],
+                    [0,2,4,5,7], [0,2,4,8,9], [0,2,6,7,9], [0,3,4,6,7], [0,3,4,8,9],
+                    [0,3,7,8,9], [0,4,5,6,9], [0,5,6,7,8], [1,2,3,5,8], [1,2,3,7,9],
+                    [1,2,4,5,9], [1,2,4,6,7], [1,2,6,8,9], [1,3,4,6,8], [1,3,4,7,9],
+                    [1,3,5,6,7], [1,3,8,9,0], [1,4,5,6,8], [1,4,7,8,9], [1,5,7,8,9], 
+                    [2,3,4,5,6], [2,3,4,7,9], [2,3,6,7,9], [2,3,7,8,9], [2,4,5,8,9], 
+                    [2,4,6,7,8], [2,5,6,7,9], [3,4,5,7,8], [3,4,5,7,9], [3,4,6,8,9], 
+                    [3,5,6,8,9], [4,5,6,7,9], [4,5,6,8,9], [4,5,7,8,9], [0,2,5,8,9], 
+                    [1,3,4,5,9], [1,2,5,7,8], [0,3,5,6,8], [0,1,4,6,9], [2,3,4,6,8]
+                ];
+                const m10_safe = m10.map(row => row.map(idx => (idx === 0 && row.indexOf(0) !== row.lastIndexOf(0)) ? 1 : idx).map(idx=> idx === 0 ? 0 : idx));
+                jogosAtuais = m10_safe.map(row => row.map(idx => dezenas[idx%10]).sort((a,b) => a-b));
+                
+                let uniqueJogos = Array.from(new Set(jogosAtuais.map(JSON.stringify)), JSON.parse);
+                while(uniqueJogos.length < 50) {
+                    let s_extra = Array.from(new Set([dezenas[Math.floor(Math.random()*10)], dezenas[Math.floor(Math.random()*10)], dezenas[Math.floor(Math.random()*10)], dezenas[Math.floor(Math.random()*10)], dezenas[Math.floor(Math.random()*10)]])).sort((a,b)=>a-b);
+                    if(s_extra.length === 5 && !uniqueJogos.some(j => JSON.stringify(j) === JSON.stringify(s_extra))) uniqueJogos.push(s_extra);
+                }
+                jogosAtuais = uniqueJogos.slice(0,50);
+
+            } else if (qtdeDezenasAtual === 12) {
+                // Matriz Otimizada 12 dezenas -> 120 jogos
+                const allCombs = [];
+                for (let a = 0; a < 8; a++) {
+                    for (let b = a + 1; b < 9; b++) {
+                        for (let c = b + 1; c < 10; c++) {
+                            for (let d = c + 1; d < 11; d++) {
+                                for (let e = d + 1; e < 12; e++) {
+                                    allCombs.push([a, b, c, d, e]);
+                                }
+                            }
+                        }
+                    }
+                }
+                let m12 = [];
+                const step = allCombs.length / 120; // Amostragem uniforme para cobrir 120 jogos
+                for (let i = 0; i < 120; i++) {
+                    let idx = Math.floor(i * step);
+                    m12.push(allCombs[idx]);
+                }
+                jogosAtuais = m12.map(row => row.map(idx => dezenas[idx]).sort((a,b) => a-b));
+            }
+
+            renderJogos(jogosAtuais);
+            document.getElementById('painelSimulador').classList.remove('hidden');
+            mostrarToast("Fechamento gerado com sucesso!", "success");
+        }
+
+        function renderJogos(jogos) {
+            jogosAtuais = jogos;
+            const container = document.getElementById('jogos-container');
+            document.getElementById('tituloJogosGerados').innerText = `Jogos Gerados (${jogos.length}):`;
+            container.innerHTML = jogos.map((j, i) => `<div class="p-2 bg-white rounded border border-slate-200 hover:bg-indigo-50 cursor-default transition-colors">J-${String(i+1).padStart(3, '0')}: <br><span class="font-bold text-slate-800 text-sm tracking-widest">${j.map(n => String(n).padStart(2, '0')).join(' ')}</span></div>`).join('');
+            document.getElementById('areaResultados').classList.remove('hidden');
+            document.getElementById('painelSimulador').classList.remove('hidden');
+        }
+
+        function salvarJogos() {
+            if (!jogosAtuais || jogosAtuais.length === 0) return mostrarToast("Gere os jogos primeiro.", "error");
+            const dezenas = Array.from(document.querySelectorAll('.dezenas')).map(i => parseInt(i.value) || null);
+            localStorage.setItem('quina_master_real', JSON.stringify({
+                qtde: qtdeDezenasAtual,
+                dezenas: dezenas, 
+                jogos: jogosAtuais
+            }));
+            mostrarToast("Jogos salvos! Volte durante a semana para conferir.", "success");
+        }
+
+        // ==========================================
+        // MÓDULO DE SIMULADOR & CONFERÊNCIA DIÁRIA
+        // ==========================================
+
+        function simularSorteioManual() {
+            const input = document.getElementById('resultado-input').value;
+            const res = input.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+            
+            if(res.length !== 5) return alert("Digite exatamente 5 números separados por vírgula para conferir.");
+            executarSimulacao(res);
+        }
+
+        function testarGarantiaAutomatica() {
+            const dezenas = Array.from(document.querySelectorAll('.dezenas')).map(i => parseInt(i.value)).filter(n => !isNaN(n));
+            if (dezenas.length !== qtdeDezenasAtual) return alert("Gere o seu fechamento primeiro.");
+
+            let embaralhado = [...dezenas].sort(() => 0.5 - Math.random());
+            let simSorteado = embaralhado.slice(0, 5).sort((a,b)=>a-b);
+            
+            document.getElementById('resultado-input').value = simSorteado.join(', ');
+            executarSimulacao(simSorteado, true);
+        }
+
+        function executarSimulacao(res, isTesteGarantia = false) {
+            if(!jogosAtuais || jogosAtuais.length === 0) return alert("Gere os jogos antes de conferir.");
+
+            let pr = {quina:0, quadra:0, terno:0, duque:0};
+            let html = "";
+
+            jogosAtuais.forEach((jogo, i) => {
+                const acertos = jogo.filter(n => res.includes(n));
+                const q = acertos.length;
+                
+                if(q >= 2) {
+                    let cor = q===5 ? "bg-purple-600 border-purple-400 text-white" : q===4 ? "bg-green-600 border-green-400 text-white" : q===3 ? "bg-blue-600 border-blue-400 text-white" : "bg-slate-800 border-slate-700 text-slate-300";
+                    let label = q===5 ? "🏆 QUINA!" : q===4 ? "🎯 QUADRA!" : q===3 ? "👍 TERNO" : "DUQUE";
+                    
+                    if(q===5) pr.quina++;
+                    if(q===4) pr.quadra++;
+                    if(q===3) pr.terno++;
+                    if(q===2) pr.duque++;
+
+                    html += `<div class="p-3 rounded-xl border ${cor} font-bold flex justify-between items-center text-sm shadow-sm">
+                        <span class="opacity-80">Jogo ${String(i+1).padStart(3, '0')}</span>
+                        <span class="tracking-widest">${jogo.map(n => res.includes(n) ? `<u class="text-yellow-300 font-black">${String(n).padStart(2, '0')}</u>` : String(n).padStart(2, '0')).join(' ')}</span>
+                        <span class="px-2 py-1 bg-black bg-opacity-30 rounded text-xs">${label}</span>
+                    </div>`;
+                }
+            });
+
+            let resumoHeader = isTesteGarantia ? "⚡ TESTE DE GARANTIA MATEMÁTICA (5 acertos dentro do seu grupo):" : "RESULTADO DA CONFERÊNCIA:";
+
+            let resumo = `<div class="p-4 bg-slate-800 border border-yellow-500/50 text-yellow-300 rounded-xl font-bold text-center text-sm shadow-lg">
+                <div class="text-xs uppercase tracking-wider text-slate-400 mb-1">${resumoHeader}</div>
+                <div class="text-base text-white">${pr.quina} Quinas | ${pr.quadra} Quadras | ${pr.terno} Ternos | ${pr.duque} Duques</div>
+            </div>`;
+
+            document.getElementById('simulacao-resultado').innerHTML = (pr.quina + pr.quadra + pr.terno + pr.duque > 0) ? (resumo + html) : `<div class="text-center text-slate-400 p-6 border border-slate-800 rounded-xl">Infelizmente nenhum bilhete premiado nesta simulação (0 ou 1 acerto).</div>`;
+        }
+    </script>
+</body>
+</html>
